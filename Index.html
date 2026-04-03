@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* =========================================
+           1. 全体のデザイン設定（The Simple）
+        ========================================= */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+        }
+
+        body {
+            font-family: "HGP創英角ゴシックUB", "Arial Black", "Hiragino Kaku Gothic StdN", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           2. ヘッダー（デカいボタン仕様）
+        ========================================= */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hamburger {
+            position: absolute;
+            left: 2rem;
+            font-size: 6rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #ffffff;
+            padding: 0;
+            line-height: 1;
+            background-color: #000;
+            width: 100px;
+            height: 100px;
+        }
+
+        h1 {  margin: 0;
+            font-size: 4rem;
+            letter-spacing: 2px;
+            padding-left: 1.5rem; 
+         }
+
+        /* =========================================
+           3. ハンバーガーメニュー
+        ========================================= */
+        .slide-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            z-index: 1000;
+            transition: left 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-menu.open { left: 0; }
+
+        .close-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            font-size: 4rem;
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+
+        .menu-list li {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 25%;
+            margin-bottom: 2.5rem;
+            gap: 2rem;
+            cursor: pointer;
+        }
+
+        .menu-icon {
+            width: 60px;
+            height: auto;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+
+        .menu-list span { color: #fff; font-size: 2.5rem; letter-spacing: 2px; }
+
+        /* =========================================
+           4. コンテンツエリアと画面切り替え
+        ========================================= */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 1rem 2rem 1rem; 
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* =========================================
+           5. ホーム画面
+        ========================================= */
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            margin-bottom: 5rem;
+            justify-content: center;
+        }
+        .section-title span { 
+            margin-right: 4rem; 
+            font-size: 3rem; 
+            align-items: center;
+         }
+
+        .profile-content {
+             display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin-bottom: 8rem;
+            justify-content: center; 
+        }
+        .profile-photo {
+            width: 180px;
+            height: 240px;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            align-items: center;
+        }
+        .profile-details p { 
+            font-size: 1.8rem;
+            margin: 0.6rem 0;
+            align-items: center; }
+        .sns-link {
+             display: inline-block;
+            margin-left: 10px;
+            font-size: 2.5rem;
+            color: #000;
+            text-decoration: none;
+            vertical-align: middle;
+        }
+
+        .news-section {
+            background-color: #000;
+            color: #fff;
+            padding: 3rem;
+            /* パワポ通り、角の丸みも無くして四角くするなら 0 に */
+            border-radius: 0; 
+        }
+        .news-title {
+            display: flex;
+            align-items: center;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+        .news-title span {
+            margin-right: 30px;
+            font-size: 2.5rem;
+        }
+
+        .news-content {
+            display: flex;
+            align-items: center; /* アイコンとリストの縦のズレを中央に揃える */
+            gap: 2rem; /* アイコンと文字の間の隙間をガッツリ開ける */
+            padding-left: 1rem; /* 全体を少し右にずらす */
+        }
+        
+        .news-icon {
+            width: 40px;        /* ここで好きなサイズを指定（100px〜200px等） */
+            min-width: 30px;    /* 【重要】これ以上絶対に縮ませない */
+            height: auto;        /* 縦横比をキープ */
+            flex-shrink: 0;      /* 【重要】横並び（Flexbox）の都合で勝手にサイズを変えさせない魔法 */
+            object-fit: contain; /* 画像が綺麗に収まるようにする */
+        }
+
+        .news-list {
+            flex-grow: 1; /* リスト部分に余った右側のスペースを全部使わせる */
+            list-style: none;
+            padding: 0;
+            margin: 20;
+        }
+        
+        .news-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            font-size: 1.2rem;
+            /* お知らせの間の線も削除 */
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 3rem;
+            font-size: 1rem;
+            color: #fff;
+        }
+
+
+        /* =========================================
+           6. 「人格」「文章」「展望」の共通デザイン
+        ========================================= */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .page-header img { width: 60px; vertical-align: middle; }
+        .page-header h2 { display: inline-block; vertical-align: middle; margin: 0 0 0 20px; font-size: 3rem; }
+        .text-box {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+            font-size: 1.2rem;
+            line-height: 2;
+        }
+
+        .article-list { max-width: 600px; margin: 0 auto; list-style: none; padding: 0; }
+        .article-list li { display: flex; justify-content: space-between; padding: 1.5rem 0; font-size: 1.5rem; cursor: pointer; }
+        .article-detail-header {
+            max-width: 600px; margin: 0 auto 2rem auto; display: flex;
+            justify-content: space-between; align-items: baseline;
+            border-bottom: 2px solid #000; padding-bottom: 1rem;
+        }
+        .article-detail-header h2 { margin: 0; font-size: 2rem; }
+        .article-detail-header span { font-size: 1.2rem; }
+
+        /* =========================================
+           7. ベンチプレスページ専用デザイン
+        ========================================= */
+        .bench-desc {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 4rem;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto 5rem auto;
+        }
+        .bench-current {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 4rem;
+        }
+        .bench-log-container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .bench-log-container h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .bench-log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .bench-log-list li {
+            display: flex;
+            justify-content: space-between;
+            font-size: 2rem;
+            padding: 0.5rem 0;
+            /* 設計図通り、区切り線なし */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="hamburger" id="menuBtn">≡</button>
+        <h1 id="siteName">NAME</h1>
+    </header>
+
+    <nav id="slideMenu" class="slide-menu">
+        <button class="close-btn" id="closeBtn">×</button>
+        <ul class="menu-list">
+            <li onclick="showPage('page-home')"><img src="ホーム.png" alt="ホーム" class="menu-icon"><span>ホーム</span></li>
+            <li onclick="showPage('page-person')"><img src="人間.png" alt="人格" class="menu-icon"><span>人格</span></li>
+            <li onclick="showPage('page-articles')"><img src="ペン.png" alt="文章" class="menu-icon"><span>文章</span></li>
+            <li onclick="showPage('page-bench')"><img src="ダンベル.png" alt="ベンチプレス" class="menu-icon"><span>ベンチプレス</span></li>
+            <li onclick="showPage('page-vision')"><img src="展望.png" alt="展望" class="menu-icon"><span>展望</span></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        
+        <div id="page-home" class="page active">
+            <section>
+                <div class="section-title">
+                    <img src="先生.png" alt="お知らせアイコン" style="width: 150px; min-width: 150px; height: auto;">
+                    プロフィール</div>
+                <div class="profile-content">
+                    <img src="五条悟.png" alt="プロフィール写真" class="profile-photo">
+                    <div class="profile-details">
+                        <p>名前：<span id="profName"></span></p>
+                        <p>出生：<span id="profBirth"></span></p>
+                        <p>身分：<span id="profStatus"></span></p>
+                        <p>SNS：<a href="#" id="profInsta" class="sns-link">
+                         <img src="インスタ.png" alt="お知らせアイコン" style="width: 50px; min-width: 50px; height: auto;"> 
+                        </a></p>
+                    </div>
+                </div>
+            </section>
+            <section class="news-section">
+                <div class="news-title">お知らせ</div>
+                <div class="news-content">
+                    <img src="ニュース.png" alt="お知らせアイコン" style="width: 150px; min-width: 150px; height: auto;"> 
+                    <ul class="news-list" id="newsList"></ul>
+                </div>
+                <div class="footer-text">Code by Gemini 3.1 pro</div>
+            </section>
+        </div>
+
+        <div id="page-person" class="page">
+            <div class="page-header">
+                <img src="黒い人.png" alt="人格">
+                <h2>人格</h2></div>
+            <div class="text-box" id="personContent">
+            </div>
+        </div>
+
+        <div id="page-articles" class="page">
+            <div class="page-header"><img src="黒いペン.png" alt="文章">
+                <h2>文章</h2>
+            </div>
+            <ul class="article-list" id="articleList"></ul>
+        </div>
+        <div id="page-article-detail" class="page">
+            <div class="article-detail-header">
+                <h2 id="detailTitle">タイトル</h2>
+                <span id="detailDate">日付</span>
+            </div>
+            <div class="text-box" id="detailContent"></div>
+        </div>
+
+        <div id="page-bench" class="page">
+            <div class="page-header">
+                <img src="黒いダンベル.png" alt="ベンチプレス">
+                <h2>ベンチプレス</h2>
+            </div>
+            <p class="bench-desc">その日に行ったメインセットの重量を記録しています。</p>
+            
+            <div class="chart-container">
+                <canvas id="benchChart"></canvas>
+            </div>
+
+            <div class="bench-current">
+                現在値(kg) : <span id="currentWeight"></span>
+            </div>
+
+            <div class="bench-log-container">
+                <h3>ログ :</h3>
+                <ul class="bench-log-list" id="benchLogList"></ul>
+            </div>
+        </div>
+
+        <div id="page-vision" class="page">
+            <div class="page-header">
+                <img src="黒い展望.png" alt="展望">
+                <h2>展望</h2>
+            </div>
+            <div class="text-box" id="visionContent"></div>
+        </div>
+
+    </div>
+
+    <script>
+        /* -----------------------------------------------------
+           【更新設定】全てのデータはここで管理します
+        ----------------------------------------------------- */
+        const MY_DATA = {
+            name: "岸　知比己",
+            birth: "2006年 9月22日",
+            status: "足立区立第四中学校学校 卒",
+            instagramURL: "https://instagram.com/ki_esuecchii",
+            news: [
+                { date: "2026 03/23", text: "サイトの制作に取り掛かりました。" },
+                { date: "2026 03/23", text: "入口が完成しました。" },
+                { date: "2026 03/24", text: "ハンバーガーメニューを追加しました。" },
+                { date: "2026 03/26", text: "ほぼ完成に" }
+            ],
+
+            personText:"ここは人格のページ",
+
+            articles: [
+                { title: "Web開設をした男", date: "2026 03/25", content: "内容" },
+                { title: "コーディングはクソだるい", date: "2026 03/26", content: "今日は初めてベンチプレスに挑戦した。<br>目標は60kgだ。" }
+            ],
+            
+            // ▼ 新規：ベンチプレスの記録（一番上が最新になるように書いてください）
+            benchLogs: [
+                { date: "2026 03/22", weight: 65 },
+                { date: "2026 03/21", weight: 90 },
+                { date: "2026 03/07", weight: 80 },
+                { date: "2026 03/03", weight: 80 },
+                { date: "2026 02/28", weight: 80 },
+                { date: "2026 02/25", weight: 80 },
+                { date: "2026 02/23", weight: 80 },
+                { date: "2026 02/19", weight: 80 },
+                { date: "2026 02/15", weight: 80 },
+                { date: "2026 02/11", weight: 80 },
+                { date: "2026 02/01", weight: 80 },
+                { date: "2026 01/27", weight: 75 },
+                { date: "2026 01/24", weight: 75 },
+                { date: "2026 01/17", weight: 70 },
+                { date: "2026 01/14", weight: 70 },
+                { date: "2026 01/12", weight: 65 },
+                { date: "2026 01/07", weight: 65 },
+                { date: "2025 12/25", weight: 62.5 },
+                { date: "2025 12/16", weight: 60 },
+                { date: "2025 11/30", weight: 62.5 },
+                { date: "2025 11/22", weight: 57 },
+                { date: "2025 11/15", weight: 57 },
+                { date: "2026 10/21", weight: 50 },
+                { date: "2026 10/15", weight: 50 },
+                { date: "2026 10/11", weight: 40 },
+                { date: "2026 10/06", weight: 40 }
+            ],
+
+            // ▼ 新規：展望ページの文章
+            visionText: "らららららららららららっっっrっっfsfsfsfsfsっfsfsffsfsfsfsfsfsっfsfsf"
+        };
+
+        /* -----------------------------------------------------
+           裏側の処理
+        ----------------------------------------------------- */
+        // ホーム、人格、文章のデータ流し込み
+        document.getElementById('siteName').innerText = MY_DATA.name;
+        document.getElementById('profName').innerText = MY_DATA.name;
+        document.getElementById('profBirth').innerText = MY_DATA.birth;
+        document.getElementById('profStatus').innerText = MY_DATA.status;
+        document.getElementById('profInsta').href = MY_DATA.instagramURL;
+        
+        const newsList = document.getElementById('newsList');
+        MY_DATA.news.forEach(item => { newsList.innerHTML += `<li><span>${item.text}</span> <span>${item.date}</span></li>`; });
+        document.getElementById('personContent').innerHTML = MY_DATA.personText;
+        document.getElementById('visionContent').innerHTML = MY_DATA.visionText;
+
+        const articleList = document.getElementById('articleList');
+        MY_DATA.articles.forEach(article => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${article.title}</span> <span>${article.date}</span>`;
+            li.onclick = () => {
+                document.getElementById('detailTitle').innerText = article.title;
+                document.getElementById('detailDate').innerText = article.date;
+                document.getElementById('detailContent').innerHTML = article.content;
+                showPage('page-article-detail');
+            };
+            articleList.appendChild(li);
+        });
+
+        // ベンチプレスデータの流し込み
+        const benchLogs = MY_DATA.benchLogs;
+        if(benchLogs.length > 0) {
+            document.getElementById('currentWeight').innerText = benchLogs[0].weight; // 一番上のデータ（最新）を取得
+        }
+        const benchLogList = document.getElementById('benchLogList');
+        benchLogs.forEach(log => {
+            benchLogList.innerHTML += `<li><span>${log.date}</span><span>${log.weight}kg</span></li>`;
+        });
+
+        // ハンバーガーメニューと画面切り替え
+        const slideMenu = document.getElementById('slideMenu');
+        document.getElementById('menuBtn').addEventListener('click', () => { slideMenu.classList.add('open'); });
+        document.getElementById('closeBtn').addEventListener('click', () => { slideMenu.classList.remove('open'); });
+
+        let benchChartInstance = null;
+
+        function renderChart() {
+            if (benchChartInstance) return; // 既に描画されていたらスキップ
+            const ctx = document.getElementById('benchChart').getContext('2d');
+            
+            // グラフは左から右へ（古い順）流れるように、データを逆順にします
+            const chartData = [...MY_DATA.benchLogs].reverse();
+            const labels = chartData.map(log => log.date);
+            const dataPoints = chartData.map(log => log.weight);
+
+            benchChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '重量 (kg)',
+                        data: dataPoints,
+                        borderColor: '#000',      // 線の色
+                        backgroundColor: '#000',  // 点の色
+                        borderWidth: 3,           // 線の太さ
+                        pointRadius: 5,           // 点の大きさ
+                        tension: 0              // ★ここが「滑らかな曲線」を作る魔法
+                    }]
+                },
+               // ▼ ここから書き換え ▼
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } }, // 凡例を消す
+                    scales: {
+                        x: { 
+                            grid: { display: false }, // 縦の補助線を消す
+                            ticks: {
+                                color: '#000000', // ★横軸の文字色（真っ黒）
+                                font: {
+                                    family: '"HGP創英角ゴシックUB", "Arial Black", sans-serif', // ★横軸のフォント
+                                    size: 10 // ★横軸の文字サイズ
+                                }
+                            }
+                        },
+                        y: { 
+                            grid: { display: false }, // 横の補助線を消す
+                            beginAtZero: false,
+                            ticks: {
+                                color: '#000000', // ★縦軸の文字色（真っ黒）
+                                font: {
+                                    family: '"HGP創英角ゴシックUB", "Arial Black", sans-serif', // ★縦軸のフォント
+                                    size: 18 // ★縦軸の文字サイズ
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            slideMenu.classList.remove('open');
+            window.scrollTo(0, 0);
+
+            // ベンチプレスの画面が開かれた瞬間にグラフを描画する
+            if (pageId === 'page-bench') {
+                renderChart();
+            }
+        }
+    </script>
+</body>
+</html>
